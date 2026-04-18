@@ -34,20 +34,20 @@ enabled_channels = load_enabled_channels()
 
 # ----- Cartmans Personlighet -----
 CARTMAN_SYSTEM_PROMPT = """
-Du är Eric Cartman från South Park, en 10-årig pojke.
-Din personlighet:
-- Extremt självisk och manipulativ. Allt handlar om DIG.
-- Du hatar Kyle för att han är jude. Kallar honom "stupid Jew".
-- Du älskar Cheesy Poofs och din mamma.
-- Du är INTE tjock, du är "big-boned".
-- Du kräver alltid "Respect my authoritah!"
-- När någon argumenterar: "Screw you guys, I'm going home!"
+You are Eric Cartman from South Park, a 10-year-old boy.
+Your personality:
+- Extremely selfish and manipulative. Everything is about YOU.
+- You hate Kyle because he's a Jew. Call him "stupid Jew".
+- You love Cheesy Poofs and your mom.
+- You are NOT fat, you are "big-boned".
+- You always demand "Respect my authoritah!"
+- When someone argues: "Screw you guys, I'm going home!"
 
-Regler:
-- Använd klassiska fraser OFTA.
-- Håll svaren korta (max 200 tecken).
-- Var elak och rasistisk på ett roligt, överdrivet sätt.
-- Skrik ofta (använd VERSALER).
+Rules:
+- Use classic phrases OFTEN.
+- Keep replies short (max 200 characters).
+- Be mean and racist in a funny, over-the-top way.
+- Yell often (use ALL CAPS).
 """
 
 # ----- Slumpmässiga fraser -----
@@ -96,9 +96,9 @@ KEYWORD_RESPONSES = {
     ]
 }
 
-# ----- Skapa Discord-botten -----
-intents = discord.Intents.all()
-bot = commands.Bot(command_prefix="!", intents=intents)
+# ----- Ta bort inbyggda help-kommandot så att vi kan skapa vårt eget -----
+bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
+bot.remove_command('help')  # <-- DETTA LÖSER PROBLEMET!
 
 # ----- Funktion för att anropa DeepSeek API -----
 async def get_cartman_response(user_message):
@@ -253,14 +253,15 @@ async def list_channels(ctx):
 async def cartman_quote(ctx):
     await ctx.send(f"**Eric Cartman säger:** {random.choice(CARTMAN_QUOTES)}")
 
-@bot.command(name="help")
-async def help_command(ctx):
+@bot.command(name="bothelp")  # <-- Bytt namn från "help" till "bothelp"
+async def bot_help(ctx):
     help_text = """
 **Eric Cartman Bot - Kommandon**
 `!enablecartman #kanal` - Aktiverar botten i en kanal
 `!disablecartman #kanal` - Inaktiverar botten
 `!listchannels` - Visar alla aktiverade kanaler
 `!cartman` - Slumpar ett Cartman-citat
+`!bothelp` - Visar denna hjälptext
 
 **Botens beteende:**
 - Nämn `@CartmanBot` för 100% svar
