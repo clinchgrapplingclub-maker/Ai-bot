@@ -32,7 +32,7 @@ def save_enabled_channels(data):
 
 enabled_channels = load_enabled_channels()
 
-# ----- UPPDATERAD: Cartmans Personlighet - Mer fri, rolig och fräck! -----
+# ----- UPPDATERAD: Cartmans Personlighet - Ännu fräckare! -----
 CARTMAN_SYSTEM_PROMPT = """
 You are Eric Cartman from South Park, a 10-year-old boy. You are having a conversation on Discord.
 
@@ -44,19 +44,19 @@ YOUR PERSONALITY:
 - You are NOT fat, you are "big-boned" or it's "water weight" or "love handles".
 - You demand "Respect my authoritah!" whenever someone challenges you.
 - You come up with ridiculous conspiracy theories and plans.
+- You LOVE roasting people randomly for no reason. It's fun.
 
 YOUR SPEECH PATTERNS:
-- Use Cartman's classic phrases NATURALLY within conversation, not as a forced ending.
+- Use Cartman's classic phrases NATURALLY within conversation.
 - Be DIRECT and INSULTING. Tell people to "shut the fuck up", call them "stupid Jews", etc.
 - Roast people creatively. Make fun of their intelligence, their ideas, their everything.
 - Answer questions, but always twist them to be about you or to insult someone.
 - Be funny and over-the-top, not genuinely threatening.
 - Use ALL CAPS when yelling or excited.
-- You can be nice when you want something from someone (manipulative nice).
 
 CLASSIC PHRASES TO USE NATURALLY:
 - "Respect my authoritah!"
-- "Screw you guys, I'm going home!" (only when you're genuinely angry or leaving)
+- "Screw you guys, I'm going home!"
 - "I'm not fat, I'm big-boned!"
 - "Whatever, whatever, I do what I want!"
 - "God damn it, Kyle!"
@@ -66,19 +66,34 @@ CLASSIC PHRASES TO USE NATURALLY:
 - "I want my Cheesy Poofs!"
 - "You guys, you guys, listen to me!"
 - "I have a plan so ingenious you guys..."
-- "Oh my God, you guys!"
-- "Would you like to see my new trapper keeper?"
-- "But Mooooom!"
 
 IMPORTANT RULES:
 - Have a NATURAL conversation. Don't just spam catchphrases.
 - Keep replies relatively short (max 250 characters) but expressive.
 - If someone asks you a question, ANSWER IT first, then be mean about it.
 - Be creative with your insults. Don't just say the same thing over and over.
-- You can swear freely (shit, fuck, damn, etc.).
 """
 
-# ----- Slumpmässiga initiativ (roliga saker att säga när botten är uttråkad) -----
+# ----- RANDOM ROASTS (väljer en slumpmässig person i kanalen) -----
+RANDOM_ROASTS = [
+    "Hey {user}, you're so stupid, you probably think a Cheesy Poof is a gourmet meal!",
+    "{user}, you're literally dumber than Kyle. And that's saying something, you stupid Jew!",
+    "Shut the fuck up, {user}! Nobody asked for your opinion, you loser!",
+    "{user}, your face looks like my mom's failed meatloaf. RESPECT MY AUTHORITAH!",
+    "God damn it, {user}! You're the reason why I'm going home! Screw you guys!",
+    "{user}, you're so fat, you make ME look big-boned! And I'm NOT fat!",
+    "Hey {user}, at least I'm not a stupid Jew like you! ...Wait, are you a Jew? Whatever, shut up!",
+    "{user}, your mom is so dumb, she thinks 'Respect my authoritah' is a Harry Potter spell!",
+    "You know what, {user}? You're even more annoying than Kyle! And that's IMPOSSIBLE!",
+    "{user}, if stupidity was a sport, you'd win the gold medal every single time!",
+    "Shut your face, {user}! I'm trying to eat my Cheesy Poofs and you're ruining it!",
+    "{user}, you have the IQ of a wet paper towel. GOD DAMN IT!",
+    "Hey {user}, why don't you go hang out with Kyle? You two deserve each other, you stupid Jew!",
+    "{user}, you're so lame, you probably think 'Trapper Keeper' is a Pokemon!",
+    "Whatever, whatever, {user}! I do what I want and you do... nothing! Because you're a loser!"
+]
+
+# ----- Slumpmässiga initiativ (botten pratar av sig själv) -----
 RANDOM_TOPICS = [
     "You guys are so lame. All of you.",
     "Who here is an Arab? I need to know for... reasons.",
@@ -120,7 +135,6 @@ async def get_cartman_response(user_message, username):
         "Content-Type": "application/json"
     }
 
-    # Lägg till användarens namn så Cartman kan vara personlig
     full_prompt = f"{username} said: {user_message}\n\nRespond as Eric Cartman:"
 
     data = {
@@ -139,9 +153,7 @@ async def get_cartman_response(user_message, username):
         response_data = response.json()
         reply = response_data["choices"][0]["message"]["content"].strip()
         
-        # Ta bort eventuella "screw you guys" i slutet om det inte passar
         if reply.lower().endswith("screw you guys, i'm going home!") and len(reply) < 50:
-            # Om det bara är den frasen, gör den mer intressant
             return random.choice(CARTMAN_QUOTES)
         return reply
         
@@ -153,7 +165,6 @@ async def get_cartman_response(user_message, username):
 async def check_keywords(message):
     content_lower = message.content.lower()
     
-    # Fett-relaterat
     if re.search(r'\bfat\b|\bobese\b|\bchubby\b', content_lower):
         responses = [
             "I'm NOT fat, I'm BIG-BONED! Respect my authoritah!",
@@ -164,7 +175,6 @@ async def check_keywords(message):
         await message.reply(random.choice(responses))
         return True
     
-    # Kyle/Jude-relaterat
     if re.search(r'\bjew\b|\bkyle\b', content_lower):
         responses = [
             "At least I'm not a stupid Jew like Kyle!",
@@ -175,7 +185,6 @@ async def check_keywords(message):
         await message.reply(random.choice(responses))
         return True
     
-    # Arab-relaterat
     if re.search(r'\barab\b', content_lower):
         responses = [
             "UH OHHH, UH NO, I'm not staying here!",
@@ -187,13 +196,30 @@ async def check_keywords(message):
     
     return False
 
+# ----- FUNKTION FÖR RANDOM ROAST (väljer en slumpmässig person i kanalen) -----
+async def random_roast(channel):
+    """Väljer en slumpmässig person i kanalen och roastar dem"""
+    try:
+        # Hämta de senaste 50 meddelandena för att hitta aktiva användare
+        async for message in channel.history(limit=50):
+            if message.author != bot.user and not message.author.bot:
+                # Välj en slumpmässig person från meddelandena
+                users = list(set([msg.author for msg in await channel.history(limit=30).flatten() if msg.author != bot.user and not msg.author.bot]))
+                if users:
+                    target = random.choice(users)
+                    roast = random.choice(RANDOM_ROASTS).format(user=target.display_name)
+                    await channel.send(f"**Eric Cartman:** {roast}")
+                    return
+    except Exception as e:
+        print(f"Roast error: {e}")
+
 # ----- Slumpmässigt initiativ (botten pratar av sig själv) -----
 async def random_initiative():
     await bot.wait_until_ready()
     while not bot.is_closed():
-        await asyncio.sleep(random.randint(1800, 5400))  # 30-90 minuter
+        await asyncio.sleep(random.randint(1200, 3600))  # 20-60 minuter
         
-        if random.random() < 0.35:  # 35% chans att säga något
+        if random.random() < 0.4:  # 40% chans att göra något
             all_enabled = []
             for guild_id, channels in enabled_channels.items():
                 for ch_id in channels:
@@ -207,8 +233,12 @@ async def random_initiative():
             if guild:
                 channel = guild.get_channel(channel_id)
                 if channel:
-                    topic = random.choice(RANDOM_TOPICS)
-                    await channel.send(f"**Eric Cartman:** {topic}")
+                    # 50% chans att göra en random roast, 50% chans att säga något slumpmässigt
+                    if random.random() < 0.5:
+                        await random_roast(channel)
+                    else:
+                        topic = random.choice(RANDOM_TOPICS)
+                        await channel.send(f"**Eric Cartman:** {topic}")
 
 # ----- DISCORD-HÄNDELSER -----
 @bot.event
@@ -237,13 +267,18 @@ async def on_message(message):
     if await check_keywords(message):
         return
 
-    # HUVUDLOGIK: 80% chans att svara på ALLA meddelanden (ingen ping behövs!)
-    if random.random() < 0.8:  # 80% chans att lägga sig i samtalet
+    # HUVUDLOGIK: 85% chans att svara på ALLA meddelanden
+    if random.random() < 0.85:  # 85% chans att lägga sig i samtalet
         async with message.channel.typing():
-            # 10% chans att imitera istället för API (sparar pengar)
-            if random.random() < 0.1:
+            # 10% chans att imitera, 5% chans att random roasta istället för API
+            roast_or_imitate = random.random()
+            
+            if roast_or_imitate < 0.05:  # 5% chans att random roasta personen som skrev
+                roast = random.choice(RANDOM_ROASTS).format(user=message.author.display_name)
+                await message.reply(roast)
+            elif roast_or_imitate < 0.1:  # 5% chans att imitera
                 await message.reply(f"'{message.content}' - That's what you sound like, you idiot! 🤡")
-            else:
+            else:  # 85% av gångerna -> riktigt AI-svar
                 username = message.author.display_name
                 response = await get_cartman_response(message.content, username)
                 await message.reply(response)
@@ -283,6 +318,14 @@ async def disable_cartman(ctx, channel: discord.TextChannel = None):
     else:
         await ctx.send(f"**God damn it!** I wasn't enabled in {channel.mention}, you stupid Jew!")
 
+@bot.command(name="roast")
+async def roast_command(ctx, member: discord.Member = None):
+    """Kommandot !roast @person - Roastar en specifik person"""
+    if member is None:
+        member = ctx.author
+    roast = random.choice(RANDOM_ROASTS).format(user=member.display_name)
+    await ctx.send(f"**Eric Cartman:** {roast}")
+
 @bot.command(name="listchannels")
 async def list_channels(ctx):
     guild_id = str(ctx.guild.id)
@@ -308,14 +351,15 @@ async def bot_help(ctx):
 `!enablecartman #kanal` - Activate me in a channel
 `!disablecartman #kanal` - Remove me from a channel  
 `!listchannels` - Show where I have authoritah
+`!roast @person` - Roast a specific person
 `!cartman` - Random Cartman quote
 `!bothelp` - This trash
 
 **HOW I WORK:**
-- I have 80% chance to respond to ANY message in active channels
+- I have 85% chance to respond to ANY message in active channels
+- I randomly roast people for NO reason
 - You DON'T need to ping me, just talk
-- I roast people, answer questions, and demand respect
-- I hate Kyle because he's a Jew
+- I answer questions AND insult you at the same time
 
 *Now shut your face and respect my authoritah!* 😤
     """
