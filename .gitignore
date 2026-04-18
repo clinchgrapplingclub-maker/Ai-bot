@@ -1,0 +1,4 @@
+.env
+__pycache__/
+*.pyc
+enabled_channels.json
