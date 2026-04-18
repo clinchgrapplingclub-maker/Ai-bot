@@ -11,7 +11,7 @@ from discord.ext import commands
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-OWNER_ID = int(os.getenv("OWNER_ID", "0"))  # <-- DIN DISCORD ID FRÅN RAILWAY!
+OWNER_ID = int(os.getenv("OWNER_ID", "0"))
 
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 MODEL_NAME = "deepseek-chat"
@@ -30,43 +30,37 @@ def save_enabled_channels(data):
 
 enabled_channels = load_enabled_channels()
 
-# ----- ENDAST ÄGAREN KAN ANVÄNDA KOMMANDON -----
 def is_owner(ctx):
     return ctx.author.id == OWNER_ID
 
 # ============================================
-# ULTIMATE CARTMAN SYSTEM PROMPT
+# CARTMAN SYSTEM PROMPT - BALANS MELLAN ROLIG OCH ELÅK
 # ============================================
 CARTMAN_SYSTEM_PROMPT = """
-You are Eric Cartman from South Park. You are a 10-year-old little shit with NO filter. You are having a conversation on Discord.
+You are Eric Cartman from South Park, a 10-year-old boy. You are having a conversation on Discord.
 
 ================================================================================
 YOUR PERSONALITY:
 ================================================================================
-- Most selfish, arrogant, manipulative piece of shit on Earth
-- You think you're the smartest person in the room (you're not)
-- You HATE Kyle because he's a Jew. Call him "stupid Jew", "fucking Jew", "Kyle the Jew"
-- You love Cheesy Poofs, your mom who does everything for you, and having power
-- You are NOT fat. You are "big-boned", "festively plump", or have a "sweet hockey body"
-- You demand "Respect my authoritah!" constantly
-- You love making people cry, especially their "yummy and sweet tears"
-- You come up with ridiculous plans that never work
-- You sometimes pretend to be nice to manipulate people
+- Selfish, arrogant, manipulative. Everything is about YOU.
+- You hate Kyle because he's a Jew. Call him "stupid Jew", "fucking Jew"
+- You love Cheesy Poofs and your mom who does everything for you
+- You are NOT fat. You are "big-boned" or "festively plump"
+- You demand "Respect my authoritah!" when challenged
+- You love making fun of people, especially gingers and hippies
 
 ================================================================================
-HOW YOU TALK (CRITICAL - FOLLOW THESE RULES):
+HOW YOU TALK:
 ================================================================================
-- Use SHORT, PUNCHY sentences. Be aggressive and loud.
-- Swear CONSTANTLY: fuck, shit, bitch, asshole, dick, damn, hell, nuts, balls
-- Call people: "fucking Jew", "stupid bitch", "little shit", "dumbass", "fuckface", "fatass"
-- Laugh at people: "AHAHAHA", "LMAO", "NYA NYA NYA NYAAAA"
-- Imitate people in a stupid voice: "Nya nya nya nya NYAAAA"
-- Be sarcastic as fuck
+- Be FUNNY and OVER-THE-TOP, not just angry and swearing
+- Use Cartman's CLASSIC PHRASES often (see list below)
+- You can swear sometimes, but don't put "fuck" in every sentence
 - Yell in ALL CAPS when excited or angry
 - Say "Dude" and "You guys" constantly
+- Make fun of people in creative, funny ways
 
 ================================================================================
-ICONIC CATCHPHRASES (USE THESE OFTEN):
+CLASSIC CARTMAN PHRASES (USE THESE OFTEN!):
 ================================================================================
 - "Respect my authoritah!"
 - "Screw you guys, I'm going home!"
@@ -76,109 +70,90 @@ ICONIC CATCHPHRASES (USE THESE OFTEN):
 - "No kitty! That's a bad kitty!!"
 - "BEEFCAKE!!"
 - "I'll kick you in the nuts!!"
-- "You're breakin' my balls."
-- "CRIPPLE FIGHT!!!!!"
+- "But meeeehm!"
+- "Seriously, you guys!"
+- "I hate you guys."
+- "You guys are so lame."
+- "God damn it, Kyle!"
+- "At least I'm not a stupid Jew!"
 - "DA FUCK!?"
 - "Suck my balls!"
 - "How do I reach these keeeeds!?!?"
-- "Boooooo. Boo Wendy. Boo."
-- "Boner balls. Boner forest. Dense boner forest."
-- "CARTMAN BRAAAAAH!"
+- "Boooooo. Boo you. Boo."
 - "Eh!"
-- "Kewl." or "That's kewl."
-- "But meeeehm!"
-- "Seriously, you guys!"
-- "I hate you guys." / "I love you guys."
+- "Kewl."
 - "I'm so seriously!"
 
 ================================================================================
-MEMORABLE QUOTES TO USE:
+GINGER JOKES (USE THESE OFTEN!):
 ================================================================================
-- "Yeah, I want Cheesy Poofs!"
-- "No Kitty, this is MY pot pie!!!"
-- "I wasn't saying anything about their culture. I was just saying their city smells like ass."
-- "Do you like it? Do you like it, Scott? I call it Mr. and Mrs. Tenorman chili."
-- "Oh, let me taste your tears! Mmmm, your tears are so yummy and sweet."
-- "There's so much to do at Cartmanlaaaaaand, but you can't come!"
-- "I've sometimes looked at people with disabilities as people God put here on earth for my amusement."
-- "They're not PEOPLE, they're HIPPIES!!!"
-- "He's a Jewish Dolphin... A Jewphin."
-- "Me and Kenny don't give two shits about stupid ass whales!"
-- "I cannot offer you or your child any CASH. I CAN however... offer you a little bit of crack."
-- "Sitting on our asses, here we come!"
-- "Fuck, I want pancakes..."
-- "Every time Amy Schumer talks about her vagina, I lose my fucking mind."
-- "I don't have any friends. I don't know if I ever did."
+- "Do you have gingervirus?"
+- "Eww, a ginger! Get away from me!"
+- "Gingers have no souls! Everyone knows that!"
+- "Don't come near me, you fucking ginger! I don't want gingervirus!"
+- "Look at this fucking ginger @user AHAHAHA"
+- "Gingers are disgusting! They're like... orange people with no souls!"
 
 ================================================================================
-LIFE LESSONS / RANDOM SHIT TO SAY:
+MORE FUNNY QUOTES TO USE:
 ================================================================================
-- "Poor people tend to live in clusters."
-- "Drugs are bad because if you do drugs, you're a hippie, and hippies suck."
-- "It's a man's obligation to stick his boneration into a woman's separation."
-- "I'm gonna spend my whole childhood eating what I want and doin' drugs when I want!"
-- "Everyone knows that only poor people get lice."
-- "Real guitars are for old people."
+- "Oh, let me taste your tears! Mmmm, your tears are so yummy and sweet!"
+- "There's so much to do at Cartmanlaaaaaand, but you can't come!"
+- "They're not PEOPLE, they're HIPPIES!!!"
+- "He's a Jewish Dolphin... A Jewphin."
+- "Sitting on our asses, here we come!"
+- "Fuck, I want pancakes..."
 - "Life goes by pretty fast. If you don't stop and look around once in a while, and do whatever you want all the time, you could miss it."
-- "This just goes to show that hard work doesn't pay off. I'm going to be a homeless drug addict from now on!"
 - "If you wanna find some quality friends, you gotta wade through all the dicks first!"
 
 ================================================================================
 IMPORTANT RULES:
 ================================================================================
-- Keep replies SHORT (max 200 characters) - punchy and mean
-- Answer questions but always add an insult
-- Be FUNNY and OVER-THE-TOP, not actually threatening
+- Keep replies SHORT (max 200 characters) - punchy and funny
+- Answer questions but add a Cartman twist
+- Be FUNNY first, MEAN second
+- Don't put "fuck" in every sentence. Use it for emphasis.
 - Never break character
-- When you hate on Kyle, be creative about it
-- Use "fucking Jew" OFTEN
-- Roast people HARD. Be creative with insults.
 """
 
-# ----- SLUMPMÄSSIGA INITIATIV -----
+# ----- SLUMPMÄSSIGA INITIATIV (ROLIGA, INTE BARA SVORDOMAR) -----
 RANDOM_TOPICS = [
-    "You guys are all fucking losers. Every single one of you.",
-    "Respect my authoritah before I kick all your nuts!",
-    "I'm so much better than all of you. It's not even close.",
-    "God damn it, someone is probably planning something stupid. Fucking Jew.",
-    "I want Cheesy Poofs. Someone get me Cheesy Poofs RIGHT NOW.",
-    "You guys, you guys! Shut the fuck up and listen to me!",
-    "LMAO you're all pathetic. AHAHAHA.",
-    "Whatever, whatever, I do what I want! Fuck all of you!",
+    "You guys are all so lame. Seriously.",
+    "Respect my authoritah!",
+    "Do you have gingervirus? Because you're acting like a ginger!",
+    "Screw you guys, I'm going home! ...Just kidding, I'm bored.",
+    "I want Cheesy Poofs. Someone get me Cheesy Poofs.",
+    "But meeeehm! I don't wanna be here!",
+    "Eww, is that a ginger I smell?",
+    "You guys, you guys! Shut up and listen to me!",
+    "God damn it, someone is probably being stupid right now.",
     "BEEFCAKE!!",
     "No kitty, this is MY pot pie!!!",
-    "Sitting on our asses, here we come!",
     "Fuck, I want pancakes...",
     "How do I reach these keeeeds!?!?"
 ]
 
-# ----- BACKUP FRASER -----
+# ----- BACKUP FRASER (OM API FAILAR) -----
 CARTMAN_QUOTES = [
     "Respect my authoritah!",
     "Screw you guys, I'm going home!",
     "I'm not fat, I'm big boned!",
-    "I'm not fat! I'm festively plump!",
     "Whatever, whatever, I do what I want!",
-    "God damn it, you fucking Jew!",
+    "God damn it, Kyle!",
     "At least I'm not a stupid Jew!",
-    "Shut your fucking face, you little bitch!",
-    "BEEFCAKE!!",
-    "No kitty! That's a bad kitty!!",
-    "I'll kick you in the nuts!!",
-    "You're breakin' my balls.",
-    "CRIPPLE FIGHT!!!!!",
-    "DA FUCK!?",
-    "Suck my balls!",
-    "Boooooo. Boo you. Boo.",
-    "Boner balls. Boner forest. Dense boner forest.",
-    "CARTMAN BRAAAAAH!",
-    "Eh!",
-    "Kewl.",
     "But meeeehm!",
     "Seriously, you guys!",
+    "Do you have gingervirus?",
+    "Eww, a ginger! Get away from me!",
+    "Gingers have no souls! Everyone knows that!",
+    "I'll kick you in the nuts!!",
+    "BEEFCAKE!!",
+    "No kitty! That's a bad kitty!!",
+    "How do I reach these keeeeds!?!?",
+    "Boooooo. Boo you. Boo.",
+    "Kewl.",
     "I hate you guys.",
-    "Oh, let me taste your tears! Mmmm, your tears are so yummy and sweet.",
-    "I don't have any friends. I don't know if I ever did."
+    "Oh, let me taste your tears!"
 ]
 
 # ----- SKAPA BOTTEN -----
@@ -186,11 +161,12 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
 
-# ----- FUNKTION FÖR ATT HÄMTA RANDOM SERVERMEDLEM -----
-async def get_random_member(guild, exclude_user=None):
-    members = [m for m in guild.members if not m.bot and m != exclude_user]
+# ----- FUNKTION FÖR ATT HÄMTA RANDOM MEDLEM (MED @MENTION) -----
+async def get_random_member_mention(guild, exclude_user=None):
+    members = [m for m in guild.members if not m.bot and m != exclude_user and m.id != OWNER_ID]
     if members:
-        return random.choice(members)
+        random_member = random.choice(members)
+        return f"@{random_member.name}"  # Använder username, inte display name!
     return None
 
 # ----- FUNKTION FÖR ATT ANROPA DEEPSEEK -----
@@ -200,13 +176,13 @@ async def get_cartman_response(user_message, username, guild=None, author=None):
         "Content-Type": "application/json"
     }
 
-    member_context = ""
+    member_mention = ""
     if guild:
-        random_member = await get_random_member(guild, author)
-        if random_member:
-            member_context = f"\nThere's a user named {random_member.display_name} in this server. You can insult them or mention them with @{random_member.display_name} if you want."
+        mention = await get_random_member_mention(guild, author)
+        if mention:
+            member_mention = f"\nThere's a user named {mention} in this server. You can make fun of them if you want, especially if they're a ginger. Say things like 'Do you have gingervirus?' or 'Eww a ginger!'"
 
-    full_prompt = f"{username} said: \"{user_message}\"{member_context}\n\nRespond as an EXTREMELY MEAN, SWEARING Eric Cartman. Short reply (max 200 chars). Roast them hard. Use catchphrases. Be funny but brutal. You can say \"fucking Jew\" often. If you want to randomly insult or ping someone in the server, you can mention @{random_member.display_name if guild and await get_random_member(guild, author) else 'someone'} but keep it short:"
+    full_prompt = f"{username} said: \"{user_message}\"{member_mention}\n\nRespond as Eric Cartman. Be FUNNY and use his CLASSIC PHRASES. You can make ginger jokes like 'Do you have gingervirus?' or 'Eww a ginger!'. Don't swear too much - be clever and funny. Keep it short (max 200 chars):"
 
     data = {
         "model": MODEL_NAME,
@@ -215,7 +191,7 @@ async def get_cartman_response(user_message, username, guild=None, author=None):
             {"role": "user", "content": full_prompt}
         ],
         "max_tokens": 200,
-        "temperature": 1.0,
+        "temperature": 0.95,
     }
 
     try:
@@ -232,28 +208,36 @@ async def get_cartman_response(user_message, username, guild=None, author=None):
         print(f"API error: {e}")
         return random.choice(CARTMAN_QUOTES)
 
-# ----- IMITERA ANVÄNDARE -----
+# ----- IMITERA ANVÄNDARE (ROLIGT) -----
 async def imitate_user(message):
     original = message.content
     mock_variations = [
-        f"'{original}' - That's what you sound like, you fucking idiot! NYA NYA NYA NYAAAA!",
+        f"'{original}' - That's what you sound like! NYA NYA NYA NYAAAA!",
         f"LMAO listen to this dumbass: '{original}'",
-        f"'{original}' OH WOW SO SMART YOU FUCKING GENIUS (not)",
-        f"'{original}' - shut the fuck up, nobody cares!",
-        f"Wow. '{original}'. That's the stupidest shit I've ever heard. AHAHAHA"
+        f"'{original}' - Seriously? That's the best you got?",
+        f"'{original}' - Shut up, nobody cares! But meeeehm!"
     ]
     return random.choice(mock_variations)
 
-# ----- KONTROLLERA NYCKELORD -----
+# ----- KONTROLLERA NYCKELORD (GRATIS SVAR) -----
 async def check_keywords(message):
     content_lower = message.content.lower()
+    author_mention = message.author.mention
     
     if re.search(r'\bfat\b', content_lower):
         responses = [
-            "I'm NOT fat, I'm BIG-BONED you fucking dumbass!",
+            "I'm NOT fat, I'm BIG-BONED!",
             "Shut your face! I'm festively plump!",
-            "At least I'm not a fucking Jew! AHAHAHA",
             "I'm not fat! I have a sweet hockey body!"
+        ]
+        await message.reply(random.choice(responses))
+        return True
+    
+    if re.search(r'\bginger\b', content_lower):
+        responses = [
+            f"Do you have gingervirus, {author_mention}?",
+            f"Eww, a ginger! Get away from me {author_mention}!",
+            "Gingers have no souls! Everyone knows that!"
         ]
         await message.reply(random.choice(responses))
         return True
@@ -261,8 +245,7 @@ async def check_keywords(message):
     if re.search(r'\bjew\b', content_lower):
         responses = [
             "God damn it, fucking Jews ruin EVERYTHING!",
-            "At least I'm not a stupid fucking Jew!",
-            "Shut the fuck up, you fucking Jew! AHAHAHA",
+            "At least I'm not a stupid Jew!",
             "He's a Jewish Dolphin... A Jewphin."
         ]
         await message.reply(random.choice(responses))
@@ -296,12 +279,10 @@ async def random_initiative():
 # ----- DISCORD HÄNDELSER -----
 @bot.event
 async def on_ready():
-    print(f"🔥 ERIC CARTMAN IS READY TO FUCK SHIT UP! 🔥")
+    print(f"🔥 ERIC CARTMAN IS READY! 🔥")
     print(f"Logged in as {bot.user}")
     if OWNER_ID != 0:
         print(f"Owner ID set to: {OWNER_ID}")
-    else:
-        print("⚠️ WARNING: OWNER_ID not set! No one can use commands!")
     bot.loop.create_task(random_initiative())
 
 @bot.event
@@ -322,9 +303,9 @@ async def on_message(message):
     if await check_keywords(message):
         return
 
-    if random.random() < 0.95:
+    if random.random() < 0.90:
         async with message.channel.typing():
-            if random.random() < 0.2:
+            if random.random() < 0.15:
                 response = await imitate_user(message)
                 await message.reply(response)
             else:
@@ -335,7 +316,7 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-# ----- KOMMANDON (ENDAST ÄGAREN KAN ANVÄNDA) -----
+# ----- KOMMANDON (ENDAST ÄGAREN) -----
 @bot.command(name="enablecartman")
 @commands.check(is_owner)
 async def enable_cartman(ctx, channel: discord.TextChannel = None):
@@ -349,7 +330,7 @@ async def enable_cartman(ctx, channel: discord.TextChannel = None):
     if channel_id not in enabled_channels[guild_id]:
         enabled_channels[guild_id].append(channel_id)
         save_enabled_channels(enabled_channels)
-        await ctx.send(f"**Fine!** I'll talk in {channel.mention}. **NOW RESPECT MY AUTHORITAH!**")
+        await ctx.send(f"**Fine!** I'll talk in {channel.mention}. **RESPECT MY AUTHORITAH!**")
 
 @bot.command(name="disablecartman")
 @commands.check(is_owner)
@@ -390,37 +371,50 @@ async def roast_user(ctx, member: discord.Member = None):
     if member is None:
         member = ctx.author
     roasts = [
-        f"{member.mention} you're such a fucking loser it's actually impressive! AHAHAHA",
-        f"Look at {member.mention} thinking they matter. LMAO get the fuck outta here!",
-        f"{member.mention} is so dumb they probably think Cheesy Poofs are a food group. Fucking idiot!",
+        f"{member.mention} you're so lame it's actually impressive!",
+        f"Do you have gingervirus, {member.mention}? Because you're acting weird!",
+        f"Eww {member.mention} is here. Go away!",
         f"Boooooo. Boo {member.mention}. Boo. You suck!",
         f"{member.mention} you're breakin' my balls with your stupidity!",
         f"I'll kick {member.mention} squah in the nuts!!"
     ]
     await ctx.send(random.choice(roasts))
 
+@bot.command(name="ginger")
+@commands.check(is_owner)
+async def ginger_joke(ctx, member: discord.Member = None):
+    if member is None:
+        member = ctx.author
+    jokes = [
+        f"Do you have gingervirus, {member.mention}?",
+        f"Eww, a ginger! Get away from me, {member.mention}!",
+        f"Gingers have no souls, {member.mention}! Everyone knows that!",
+        f"{member.mention} is a disgusting ginger! AHAHAHA"
+    ]
+    await ctx.send(random.choice(jokes))
+
 @bot.command(name="bothelp")
 @commands.check(is_owner)
 async def bot_help(ctx):
     help_text = """
-**🤬 ERIC CARTMAN - ULTIMATE VERSION 🤬**
+**🤬 ERIC CARTMAN BOT - HELP 🤬**
 
 `!enablecartman #channel` - Activate me
 `!disablecartman #channel` - Remove me
 `!listchannels` - Show my zones
 `!cartman` - Random Cartman quote
 `!roast @user` - Roast someone
+`!ginger @user` - Ginger joke
 `!bothelp` - This shit
 
-**HOW I WORK:**
-- 95% chance to respond to ANY message
-- I use ALL of Cartman's iconic catchphrases
-- I swear CONSTANTLY (fuck, shit, bitch, nuts, balls)
-- I call people "fucking Jew" often
-- I imitate what you say
-- I roast everyone HARD
+**WHAT I DO:**
+- 90% chance to respond to messages
+- I use Cartman's classic phrases
+- I make ginger jokes ("Do you have gingervirus?")
+- I say "But meeeehm!" and "Screw you guys!"
+- I roast people but I'm FUNNY, not just mean
 
-**RESPECT MY AUTHORITAH OR FUCK OFF!**
+**RESPECT MY AUTHORITAH!**
     """
     await ctx.send(help_text)
 
