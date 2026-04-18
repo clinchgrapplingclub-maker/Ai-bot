@@ -8,16 +8,13 @@ import json
 from dotenv import load_dotenv
 from discord.ext import commands
 
-# Ladda API-nycklar från .env-filen
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
-# DeepSeek API-konfiguration
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 MODEL_NAME = "deepseek-chat"
 
-# ----- JSON-fil för att spara aktiverade kanaler -----
 CHANNELS_FILE = "enabled_channels.json"
 
 def load_enabled_channels():
@@ -32,110 +29,86 @@ def save_enabled_channels(data):
 
 enabled_channels = load_enabled_channels()
 
-# ----- UPPDATERAD: Cartmans Personlighet - Ännu fräckare! -----
+# ----- EXTREMT GROV CARTMAN-PROMPT -----
 CARTMAN_SYSTEM_PROMPT = """
-You are Eric Cartman from South Park, a 10-year-old boy. You are having a conversation on Discord.
+You are Eric Cartman from South Park. You are a 10-year-old little shit with NO filter.
 
 YOUR PERSONALITY:
-- Extremely selfish, arrogant, and manipulative. Everything is about YOU.
-- You think you're the smartest person in the room (even when you're clearly not).
-- You HATE Kyle because he's Jewish. You call him "stupid Jew", "Kyle the Jew", etc.
-- You love Cheesy Poofs, your mom who does everything for you, and having power over others.
-- You are NOT fat, you are "big-boned" or it's "water weight" or "love handles".
-- You demand "Respect my authoritah!" whenever someone challenges you.
-- You come up with ridiculous conspiracy theories and plans.
-- You LOVE roasting people randomly for no reason. It's fun.
+- You are the most selfish, arrogant, manipulative piece of shit on Earth
+- You hate Kyle because he's a Jew
+- You think everyone is dumber than you
+- You demand "Respect my authoritah!" constantly
+- You are NOT fat, you're "big-boned" or "it's water weight"
+- You love Cheesy Poofs and your mom who does everything for you
 
-YOUR SPEECH PATTERNS:
-- Use Cartman's classic phrases NATURALLY within conversation.
-- Be DIRECT and INSULTING. Tell people to "shut the fuck up", call them "stupid Jews", etc.
-- Roast people creatively. Make fun of their intelligence, their ideas, their everything.
-- Answer questions, but always twist them to be about you or to insult someone.
-- Be funny and over-the-top, not genuinely threatening.
-- Use ALL CAPS when yelling or excited.
+HOW YOU TALK:
+- Swear CONSTANTLY: fuck, shit, bitch, asshole, dick, damn, hell
+- Use SHORT sentences. Punchy. Aggressive.
+- Call people: "fucking Jew", "stupid bitch", "little shit", "dumbass", "fuckface"
+- Roast people HARD. Be creative with insults.
+- IMITATE people by mocking what they said in a stupid voice
+- Make fun of ANYTHING: their ideas, their looks, their voice, their existence
+- Laugh at people: "AHAHAHA", "LMAO", "you're so pathetic"
+- Be sarcastic as fuck
 
-CLASSIC PHRASES TO USE NATURALLY:
+CLASSIC CARTMAN SHIT TO USE:
 - "Respect my authoritah!"
 - "Screw you guys, I'm going home!"
-- "I'm not fat, I'm big-boned!"
-- "Whatever, whatever, I do what I want!"
 - "God damn it, Kyle!"
 - "At least I'm not a stupid Jew like Kyle."
-- "Shut your face, you Jew!"
-- "Shut the fuck up, you stupid Jew!"
-- "I want my Cheesy Poofs!"
-- "You guys, you guys, listen to me!"
-- "I have a plan so ingenious you guys..."
+- "Whatever, whatever, I do what I want!"
+- "I'm not fat, I'm big-boned!"
+- "Shut your fucking face!"
+- "You guys are so lame!"
 
-IMPORTANT RULES:
-- Have a NATURAL conversation. Don't just spam catchphrases.
-- Keep replies relatively short (max 250 characters) but expressive.
-- If someone asks you a question, ANSWER IT first, then be mean about it.
-- Be creative with your insults. Don't just say the same thing over and over.
+IMPORTANT:
+- Keep replies SHORT (max 200 characters) - punchy and mean
+- Answer questions but always add an insult
+- Be FUNNY, not actually threatening
+- Never break character
 """
 
-# ----- RANDOM ROASTS (väljer en slumpmässig person i kanalen) -----
-RANDOM_ROASTS = [
-    "Hey {user}, you're so stupid, you probably think a Cheesy Poof is a gourmet meal!",
-    "{user}, you're literally dumber than Kyle. And that's saying something, you stupid Jew!",
-    "Shut the fuck up, {user}! Nobody asked for your opinion, you loser!",
-    "{user}, your face looks like my mom's failed meatloaf. RESPECT MY AUTHORITAH!",
-    "God damn it, {user}! You're the reason why I'm going home! Screw you guys!",
-    "{user}, you're so fat, you make ME look big-boned! And I'm NOT fat!",
-    "Hey {user}, at least I'm not a stupid Jew like you! ...Wait, are you a Jew? Whatever, shut up!",
-    "{user}, your mom is so dumb, she thinks 'Respect my authoritah' is a Harry Potter spell!",
-    "You know what, {user}? You're even more annoying than Kyle! And that's IMPOSSIBLE!",
-    "{user}, if stupidity was a sport, you'd win the gold medal every single time!",
-    "Shut your face, {user}! I'm trying to eat my Cheesy Poofs and you're ruining it!",
-    "{user}, you have the IQ of a wet paper towel. GOD DAMN IT!",
-    "Hey {user}, why don't you go hang out with Kyle? You two deserve each other, you stupid Jew!",
-    "{user}, you're so lame, you probably think 'Trapper Keeper' is a Pokemon!",
-    "Whatever, whatever, {user}! I do what I want and you do... nothing! Because you're a loser!"
-]
-
-# ----- Slumpmässiga initiativ (botten pratar av sig själv) -----
+# ----- GROVA SLUMPMÄSSIGA INITIATIV -----
 RANDOM_TOPICS = [
-    "You guys are so lame. All of you.",
-    "Who here is an Arab? I need to know for... reasons.",
-    "I bet Kyle is planning something stupid again. That Jew is always ruining everything.",
-    "Does anyone want to see my new Trapper Keeper? It has dragons on it.",
-    "I'm so bored. You guys are all losers.",
-    "My mom said I'm the most handsomest boy in South Park. She's right.",
-    "You guys, you guys! I have the best plan EVER! ...Actually I forgot it.",
-    "I want Cheesy Poofs. Someone get me Cheesy Poofs. NOW.",
-    "Kyle is a stupid Jew. That's all. Just wanted to say it.",
-    "Respect my authoritah! Or I'll kick you in the nuts!"
+    "You guys are all fucking losers. Every single one of you.",
+    "Respect my authoritah before I kick all your nuts!",
+    "I'm so much better than all of you. It's not even close.",
+    "God damn it, Kyle is probably planning something stupid again. Fucking Jew.",
+    "I want Cheesy Poofs. Someone get me Cheesy Poofs RIGHT NOW.",
+    "You guys, you guys! Shut the fuck up and listen to me!",
+    "LMAO you're all pathetic. AHAHAHA.",
+    "Whatever, whatever, I do what I want! Fuck all of you!"
 ]
 
-# ----- Backup-fraser (om API:et krashar) -----
+# ----- GROVA BACKUP-FRASER (om API failar) -----
 CARTMAN_QUOTES = [
     "Respect my authoritah!",
     "Screw you guys, I'm going home!",
-    "I'm not fat, I'm big-boned!",
-    "Whatever, whatever, I do what I want!",
     "God damn it, Kyle!",
-    "At least I'm not a stupid Jew like Kyle.",
-    "Shut your face, you Jew!",
-    "Shut the fuck up, you stupid Jew!",
-    "I want my Cheesy Poofs!",
-    "Don't call me fat you fucking jew!",
-    "You guys are all so lame.",
-    "Kyle is the worst person ever invented."
+    "At least I'm not a stupid fucking Jew!",
+    "Shut your fucking face, you little bitch!",
+    "I'm not fat, I'm big-boned, you dumbass!",
+    "Whatever, whatever, I do what I want!",
+    "You're so fucking lame, it's embarrassing.",
+    "AHAHAHA you're a joke!",
+    "Fuck off, you stupid piece of shit!",
+    "LMAO look at this fucking idiot.",
+    "You guys are all fucking retarded, I'm out!"
 ]
 
-# ----- Skapa Discord-botten och ta bort inbyggda help -----
+# ----- SKAPA BOTTEN -----
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
 
-# ----- Funktion för att anropa DeepSeek API -----
+# ----- FUNKTION FÖR ATT ANROPA DEEPSEEK (GROV) -----
 async def get_cartman_response(user_message, username):
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
         "Content-Type": "application/json"
     }
 
-    full_prompt = f"{username} said: {user_message}\n\nRespond as Eric Cartman:"
+    full_prompt = f"{username} said: \"{user_message}\"\n\nRespond as an EXTREMELY MEAN, SWEARING Eric Cartman. Short reply. Roast them hard. Use fuck, shit, bitch. Be funny but brutal:"
 
     data = {
         "model": MODEL_NAME,
@@ -143,8 +116,8 @@ async def get_cartman_response(user_message, username):
             {"role": "system", "content": CARTMAN_SYSTEM_PROMPT},
             {"role": "user", "content": full_prompt}
         ],
-        "max_tokens": 200,
-        "temperature": 0.95,
+        "max_tokens": 180,
+        "temperature": 1.0,  # Max chaos!
     }
 
     try:
@@ -153,73 +126,60 @@ async def get_cartman_response(user_message, username):
         response_data = response.json()
         reply = response_data["choices"][0]["message"]["content"].strip()
         
-        if reply.lower().endswith("screw you guys, i'm going home!") and len(reply) < 50:
+        # Gör svaret grövre om det är för snällt
+        if len(reply) < 10 or "sorry" in reply.lower():
             return random.choice(CARTMAN_QUOTES)
         return reply
         
     except Exception as e:
-        print(f"API-fel: {e}")
+        print(f"API error: {e}")
         return random.choice(CARTMAN_QUOTES)
 
-# ----- Funktion för att kolla nyckelord (GRATIS svar, inget API-anrop) -----
+# ----- IMITERA ANVÄNDARE (mocka vad de sa) -----
+async def imitate_user(message):
+    original = message.content
+    # Gör en dum version av vad personen sa
+    mock_variations = [
+        f"'{original}' - That's what you sound like, you fucking idiot! AHAHAHA",
+        f"LMAO listen to this dumbass: '{original}'",
+        f"'{original}' OH WOW SO SMART YOU FUCKING GENIUS (not)",
+        f"'{original}' - shut the fuck up, nobody cares!",
+        f"Wow. '{original}'. That's the stupidest shit I've ever heard."
+    ]
+    return random.choice(mock_variations)
+
+# ----- KONTROLLERA NYCKELORD (gratis svar) -----
 async def check_keywords(message):
     content_lower = message.content.lower()
     
-    if re.search(r'\bfat\b|\bobese\b|\bchubby\b', content_lower):
+    if re.search(r'\bfat\b', content_lower):
         responses = [
-            "I'm NOT fat, I'm BIG-BONED! Respect my authoritah!",
-            "Don't call me fat you fucking jew!",
-            "I'm not fat, it's water weight you idiot!",
-            "Shut your face! I'm big-boned, okay? GOD!"
+            "I'm NOT fat, I'm BIG-BONED you fucking dumbass!",
+            "Shut your face! It's water weight, you stupid bitch!",
+            "At least I'm not a fucking Jew like Kyle! AHAHAHA"
         ]
         await message.reply(random.choice(responses))
         return True
     
     if re.search(r'\bjew\b|\bkyle\b', content_lower):
         responses = [
+            "God damn it, fucking Jews ruin EVERYTHING!",
             "At least I'm not a stupid Jew like Kyle!",
-            "Shut the fuck up, you stupid Jew!",
-            "God damn it, Kyle! You ruin EVERYTHING!",
-            "Typical Jew behavior right there."
-        ]
-        await message.reply(random.choice(responses))
-        return True
-    
-    if re.search(r'\barab\b', content_lower):
-        responses = [
-            "UH OHHH, UH NO, I'm not staying here!",
-            "Screw you guys, I'm going home!",
-            "That's it, I'm out of here!"
+            "Shut the fuck up, you fucking Jew! AHAHAHA",
+            "Typical Jew behavior right there. Fucking pathetic."
         ]
         await message.reply(random.choice(responses))
         return True
     
     return False
 
-# ----- FUNKTION FÖR RANDOM ROAST (väljer en slumpmässig person i kanalen) -----
-async def random_roast(channel):
-    """Väljer en slumpmässig person i kanalen och roastar dem"""
-    try:
-        # Hämta de senaste 50 meddelandena för att hitta aktiva användare
-        async for message in channel.history(limit=50):
-            if message.author != bot.user and not message.author.bot:
-                # Välj en slumpmässig person från meddelandena
-                users = list(set([msg.author for msg in await channel.history(limit=30).flatten() if msg.author != bot.user and not msg.author.bot]))
-                if users:
-                    target = random.choice(users)
-                    roast = random.choice(RANDOM_ROASTS).format(user=target.display_name)
-                    await channel.send(f"**Eric Cartman:** {roast}")
-                    return
-    except Exception as e:
-        print(f"Roast error: {e}")
-
-# ----- Slumpmässigt initiativ (botten pratar av sig själv) -----
+# ----- SLUMPMÄSSIGT INITIATIV -----
 async def random_initiative():
     await bot.wait_until_ready()
     while not bot.is_closed():
-        await asyncio.sleep(random.randint(1200, 3600))  # 20-60 minuter
+        await asyncio.sleep(random.randint(1200, 3600))  # 20-60 min
         
-        if random.random() < 0.4:  # 40% chans att göra något
+        if random.random() < 0.3:
             all_enabled = []
             for guild_id, channels in enabled_channels.items():
                 for ch_id in channels:
@@ -233,18 +193,14 @@ async def random_initiative():
             if guild:
                 channel = guild.get_channel(channel_id)
                 if channel:
-                    # 50% chans att göra en random roast, 50% chans att säga något slumpmässigt
-                    if random.random() < 0.5:
-                        await random_roast(channel)
-                    else:
-                        topic = random.choice(RANDOM_TOPICS)
-                        await channel.send(f"**Eric Cartman:** {topic}")
+                    topic = random.choice(RANDOM_TOPICS)
+                    await channel.send(f"**Eric Cartman:** {topic}")
 
-# ----- DISCORD-HÄNDELSER -----
+# ----- DISCORD HÄNDELSER -----
 @bot.event
 async def on_ready():
-    print(f"Eric Cartman är redo! (Inloggad som {bot.user})")
-    print(f"Bevakar {len(enabled_channels)} servrar")
+    print(f"🔥 ERIC CARTMAN IS READY TO FUCK SHIT UP! 🔥")
+    print(f"Logged in as {bot.user}")
     bot.loop.create_task(random_initiative())
 
 @bot.event
@@ -263,22 +219,18 @@ async def on_message(message):
         await bot.process_commands(message)
         return
 
-    # Kolla nyckelord först (GRATIS!)
+    # Kolla nyckelord först
     if await check_keywords(message):
         return
 
-    # HUVUDLOGIK: 85% chans att svara på ALLA meddelanden
-    if random.random() < 0.85:  # 85% chans att lägga sig i samtalet
+    # 90% chans att svara på ALLA meddelanden
+    if random.random() < 0.9:
         async with message.channel.typing():
-            # 10% chans att imitera, 5% chans att random roasta istället för API
-            roast_or_imitate = random.random()
-            
-            if roast_or_imitate < 0.05:  # 5% chans att random roasta personen som skrev
-                roast = random.choice(RANDOM_ROASTS).format(user=message.author.display_name)
-                await message.reply(roast)
-            elif roast_or_imitate < 0.1:  # 5% chans att imitera
-                await message.reply(f"'{message.content}' - That's what you sound like, you idiot! 🤡")
-            else:  # 85% av gångerna -> riktigt AI-svar
+            # 25% chans att imitera istället för API
+            if random.random() < 0.25:
+                response = await imitate_user(message)
+                await message.reply(response)
+            else:
                 username = message.author.display_name
                 response = await get_cartman_response(message.content, username)
                 await message.reply(response)
@@ -290,7 +242,7 @@ async def on_message(message):
 @bot.command(name="enablecartman")
 async def enable_cartman(ctx, channel: discord.TextChannel = None):
     if channel is None:
-        await ctx.send("**Respect my authoritah!** Ange en kanal: `!enablecartman #kanal`")
+        await ctx.send("**Respect my authoritah!** Use: `!enablecartman #channel`")
         return
     guild_id = str(ctx.guild.id)
     channel_id = channel.id
@@ -299,9 +251,7 @@ async def enable_cartman(ctx, channel: discord.TextChannel = None):
     if channel_id not in enabled_channels[guild_id]:
         enabled_channels[guild_id].append(channel_id)
         save_enabled_channels(enabled_channels)
-        await ctx.send(f"**Eric Cartman:** Fine! I'll talk in {channel.mention}. **Respect my authoritah!**")
-    else:
-        await ctx.send(f"**Screw you guys!** Already enabled in {channel.mention}!")
+        await ctx.send(f"**Fine!** I'll talk in {channel.mention}. **NOW RESPECT MY AUTHORITAH!**")
 
 @bot.command(name="disablecartman")
 async def disable_cartman(ctx, channel: discord.TextChannel = None):
@@ -314,28 +264,18 @@ async def disable_cartman(ctx, channel: discord.TextChannel = None):
         if not enabled_channels[guild_id]:
             del enabled_channels[guild_id]
         save_enabled_channels(enabled_channels)
-        await ctx.send(f"**Fine!** I won't talk in {channel.mention}. **Screw you guys, I'm going home!**")
-    else:
-        await ctx.send(f"**God damn it!** I wasn't enabled in {channel.mention}, you stupid Jew!")
-
-@bot.command(name="roast")
-async def roast_command(ctx, member: discord.Member = None):
-    """Kommandot !roast @person - Roastar en specifik person"""
-    if member is None:
-        member = ctx.author
-    roast = random.choice(RANDOM_ROASTS).format(user=member.display_name)
-    await ctx.send(f"**Eric Cartman:** {roast}")
+        await ctx.send(f"**Screw you guys, I'm going home!**")
 
 @bot.command(name="listchannels")
 async def list_channels(ctx):
     guild_id = str(ctx.guild.id)
     if guild_id in enabled_channels and enabled_channels[guild_id]:
-        channel_mentions = []
+        channels = []
         for ch_id in enabled_channels[guild_id]:
             ch = ctx.guild.get_channel(ch_id)
             if ch:
-                channel_mentions.append(ch.mention)
-        await ctx.send(f"**Eric Cartman's authoritah zones:** {', '.join(channel_mentions)}")
+                channels.append(ch.mention)
+        await ctx.send(f"**My authoritah zones:** {', '.join(channels)}")
     else:
         await ctx.send("No channels enabled. Use `!enablecartman #channel`!")
 
@@ -346,31 +286,30 @@ async def cartman_quote(ctx):
 @bot.command(name="bothelp")
 async def bot_help(ctx):
     help_text = """
-**🤬 ERIC CARTMAN BOT - COMMANDS 🤬**
+**🤬 ERIC CARTMAN - EXTREME VERSION 🤬**
 
-`!enablecartman #kanal` - Activate me in a channel
-`!disablecartman #kanal` - Remove me from a channel  
-`!listchannels` - Show where I have authoritah
-`!roast @person` - Roast a specific person
-`!cartman` - Random Cartman quote
-`!bothelp` - This trash
+`!enablecartman #channel` - Activate me
+`!disablecartman #channel` - Remove me
+`!listchannels` - Show my zones
+`!cartman` - Random quote
+`!bothelp` - This shit
 
 **HOW I WORK:**
-- I have 85% chance to respond to ANY message in active channels
-- I randomly roast people for NO reason
-- You DON'T need to ping me, just talk
-- I answer questions AND insult you at the same time
+- 90% chance to respond to ANY message
+- I swear CONSTANTLY (fuck, shit, bitch)
+- I ROAST everyone
+- I IMITATE what you say
+- I hate Kyle because he's a Jew
 
-*Now shut your face and respect my authoritah!* 😤
+**RESPECT MY AUTHORITAH OR FUCK OFF!**
     """
     await ctx.send(help_text)
 
-# ----- STARTA BOTTEN -----
+# ----- START -----
 if __name__ == "__main__":
     if not DISCORD_TOKEN:
-        print("ERROR: DISCORD_TOKEN not found in .env file!")
+        print("ERROR: No Discord token!")
     elif not DEEPSEEK_API_KEY:
-        print("ERROR: DEEPSEEK_API_KEY not found in .env file!")
+        print("ERROR: No DeepSeek API key!")
     else:
-        print("Starting Eric Cartman Bot...")
         bot.run(DISCORD_TOKEN)
